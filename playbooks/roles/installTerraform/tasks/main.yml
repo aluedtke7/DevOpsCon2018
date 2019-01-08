@@ -4,27 +4,27 @@
     path: "{{ item }}"
     mode: 0700
     recurse: yes
-    owner: "{{ groupVarAnsibleUser }}"
-    group: "{{ groupVarAnsibleGroup }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
   with_items:
-    - "{{ hostVarAnsibleUserHome }}/.terraform.d/plugins/"
-    - "{{ hostVarAnsibleUserHome }}/bin/"
+    - "{{ lookup('env','HOME') }}/.terraform.d/plugins/"
+    - "{{ lookup('env','HOME') }}/bin/"
 
 - name: creating temporary file dir
   file:
     path: "{{ role_path }}/files/"
     mode: 0775
     recurse: yes
-    owner: "{{ groupVarAnsibleUser }}"
-    group: "{{ groupVarAnsibleGroup }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
 
 - name: Download terraform with check (sha256) and terraform-provider-libvirt
   get_url:
     url: "{{ item.src }}"
     dest: "{{ item.dst }}"
     checksum: "{{ item.cks | default(omit) }}"
-    owner: "{{ groupVarAnsibleUser }}" 
-    group: "{{ groupVarAnsibleGroup }}"
+    owner: "{{ ansible_user_id }}" 
+    group: "{{ ansible_user_id }}"
     mode: 0600
   with_items:
     - { src: "{{ roleVarTerraformDownload }}", dst: "{{ role_path }}/files/{{ roleVarTerraformDownload | basename }}", cks: "{{ roleVarTerraformDownloadChecksum }}" }
@@ -35,11 +35,11 @@
     src: "{{ item.src }}"
     dest: "{{ item.dst }}"
     mode: 0700
-    owner: "{{ groupVarAnsibleUser }}"
-    group: "{{ groupVarAnsibleGroup }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
   with_items:
-    - { src: "{{ role_path }}/files/{{ roleVarTerraformDownload | basename }}", dst: "{{ hostVarAnsibleUserHome }}/bin/" }
-    - { src: "{{ role_path }}/files/{{ roleVarTerraformProviderLibvirtDownload | basename }}", dst: "{{ hostVarAnsibleUserHome }}/.terraform.d/plugins/" }
+    - { src: "{{ role_path }}/files/{{ roleVarTerraformDownload | basename }}", dst: "{{ lookup('env','HOME') }}/bin/" }
+    - { src: "{{ role_path }}/files/{{ roleVarTerraformProviderLibvirtDownload | basename }}", dst: "{{ lookup('env','HOME') }}/.terraform.d/plugins/" }
 
 - name: deleting zipfile of terraform and terraform-provider-libvirt
   file:

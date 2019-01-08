@@ -1,0 +1,22 @@
+---
+- hosts: local
+  roles:
+    - checkUserIsRoot
+    - { role: runTerraform, action: create }
+  tags:
+    - createCluster
+
+- hosts: kvm
+  gather_facts: no
+  tasks:
+    - setup:
+  tags:
+    - createCluster
+
+- hosts: kvm
+  gather_facts: no
+  roles:
+    - installDocker
+    - setupRkeCluster
+  tags:
+    - createCluster

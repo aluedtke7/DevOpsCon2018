@@ -5,7 +5,8 @@
     state: present
   become: yes
 
-- apt_repository:
+- name: Add kubernetes repository
+  apt_repository:
     repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
     state: present
   become: yes
@@ -20,7 +21,7 @@
 - name: git checkout https://github.com/ahmetb/kubectx
   git:
     repo: https://github.com/ahmetb/kubectx.git
-    dest: "/home/{{ groupVarAnsibleUser }}/.kubectx"
+    dest: "/home/{{ ansible_user_id }}/.kubectx"
 
 - name: install/update pkg-config
   apt:
@@ -35,7 +36,7 @@
 - name : setting link for bash completion
   file:
     dest: "{{ bashCompletion.stdout }}/{{ item }}"
-    src: "/home/{{ groupVarAnsibleUser }}/.kubectx/completion/{{ item }}.bash"
+    src: "/home/{{ ansible_user_id }}/.kubectx/completion/{{ item }}.bash"
     state: link
     owner: root
     group: root

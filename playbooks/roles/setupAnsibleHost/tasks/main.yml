@@ -1,20 +1,21 @@
 ---
-- name: installing ansible-lint, ansible-vault
+- name: installing pip, ansible, ansible-lint, ansible-vault
   pip:
     name: ['pip', 'ansible', 'ansible-lint', 'ansible-vault']
     state: latest
+  become: yes
 
 - name: create group for ansiblemaster
   group:
-    name: "{{ groupVarAnsibleGroup }}"
+    name: "{{ ansible_user_id }}"
     gid: "{{ groupVarAnsibleGid }}"
     state: present
   become: yes
 
 - name: create user for ansible host
   user:
-    name: "{{ groupVarAnsibleUser }}"
-    comment: "{{ groupVarAnsibleUser }}"
+    name: "{{ ansible_user_id }}"
+    comment: "{{ ansible_user_id }}"
     uid: "{{ groupVarAnsibleUid }}"
     group: "{{ groupVarAnsibleGid }}"
     generate_ssh_key: yes
@@ -31,29 +32,36 @@
     mode: 0644
   become: yes
 
+- name: create Ansible Vault File if not existent
+  copy:
+    dest: "{{ lookup('env','HOME') }}/.ansible/.vault_pass.txt"
+    force: no
+    content: |
+        dummy
+
 - name: generate ansible.cfg
   template:
     src: ansible.j2.cfg
-    dest: "/home/{{ groupVarAnsibleUser }}/.ansible.cfg"
-    owner: "{{ groupVarAnsibleUser }}"
-    group: "{{ groupVarAnsibleGroup }}"
+    dest: "{{ lookup('env','HOME') }}/.ansible.cfg"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
     mode: 0600
 
-- name: creating sudo privilege for ansible
+- name: creating sudo privilege for current user
   template:
     src: user.j2.sudo
-    dest: "/etc/sudoers.d/{{ groupVarAnsibleUser }}"
+    dest: "/etc/sudoers.d/{{ ansible_user_id }}"
     owner: root
     group: root
     mode: 0600
   become: yes
 
-- name: creating needed dirs
+- name: creating folder for ansible
   file:
-    path: "/home/{{ groupVarAnsibleUser }}/{{ item }}"
+    path: "/home/{{ ansible_user_id }}/{{ item }}"
     state: directory
-    owner: "{{ groupVarAnsibleUser }}"
-    group: "{{ groupVarAnsibleGroup }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
     mode: 0700
   with_items:
     - var

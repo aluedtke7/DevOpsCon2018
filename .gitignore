@@ -6,6 +6,10 @@
 *.qcow2
 playbooks/roles/downloadNodeIso/files/
 playbooks/roles/setupRkeCluster/files/id_rsa.pub
+playbooks/roles/setupRkeCluster/files/rke_linux-amd64
+playbooks/roles/runTerraform/workspace/
+playbooks/inventories/hosts.yml
 *.tfstate
 *.tfstate.backup
+*.tfstate.lock.info
 .terraform

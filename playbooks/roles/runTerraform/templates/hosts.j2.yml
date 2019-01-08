@@ -17,9 +17,9 @@ all:
 
         k8s-master:
           hosts:
-            192.168.122.99:
+            {{ ip_master }}:
 
         k8s-worker:
           hosts:
-            192.168.122.113:
-            192.168.122.251:     
+            {{ ip_worker1 }}:
+            {{ ip_worker2 }}:     

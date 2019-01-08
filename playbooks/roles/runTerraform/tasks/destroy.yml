@@ -1,0 +1,25 @@
+---
+- name: Create workspace folder
+  file:
+    path: "{{ role_path }}/{{ workspacefolder }}"
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+  tags: prepareCluster, createCluster, destroyCluster
+
+- name: prepare Terraform file
+  template:
+    src: multiNode.j2.tf
+    dest: "{{ role_path }}/{{ workspacefolder }}/multiNode.tf"
+    force: yes
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "u=rw,g=r,o=r"
+  tags: prepareCluster, destroyCluster
+
+- name: run Terraform to destroy cluster
+  terraform:
+    project_path: '{{ role_path }}/{{ workspacefolder }}'
+    state: absent
+  register: terraform
+  tags: destroyCluster

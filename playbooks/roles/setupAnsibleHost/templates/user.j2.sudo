@@ -1,1 +1,1 @@
-{{ groupVarAnsibleUser }}      ALL = NOPASSWD: ALL
+{{ ansible_user_id }}      ALL = NOPASSWD: ALL

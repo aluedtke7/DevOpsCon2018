@@ -1,0 +1,95 @@
+---
+- name: Create workspace folder
+  file:
+    path: "{{ role_path }}/{{ workspacefolder }}"
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+  tags: prepareCluster, createCluster
+
+- name: prepare Terraform file
+  template:
+    src: multiNode.j2.tf
+    dest: "{{ role_path }}/{{ workspacefolder }}/multiNode.tf"
+    force: yes
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "u=rw,g=r,o=r"
+  tags: prepareCluster, createCluster
+
+- name: prepare cloudconfig.cfg
+  template:
+    src: cloudconfig.j2.cfg
+    dest: "{{ role_path }}/{{ workspacefolder }}/cloudconfig.cfg"
+    force: yes
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "u=rw,g=r,o=r"
+  tags: prepareCluster, createCluster
+
+- name: run Terraform to create cluster
+  terraform:
+    project_path: '{{ role_path }}/{{ workspacefolder }}'
+    state: present
+    force_init: yes
+  register: terraform
+  tags: createCluster
+
+- name: Terraform Command
+  debug:
+    msg: "{{ terraform.command }}"
+  tags: createCluster
+
+- name: Print return value
+  debug:
+    msg: "{{ terraform.outputs.ips.value }}"
+  tags: createCluster
+
+- name: Variable setzen master
+  set_fact:
+    ip_master: "{{ terraform.outputs.ip_master.value }}"
+  tags: createCluster
+
+- name: Variable setzen worker 1
+  set_fact:
+    ip_worker1: "{{ terraform.outputs.ip_worker1.value }}"
+  tags: createCluster
+
+- name: Variable setzen worker 2
+  set_fact:
+    ip_worker2: "{{ terraform.outputs.ip_worker2.value }}"
+  tags: createCluster
+
+- name: IPs ausgeben
+  debug:
+    msg: 'Master {{ ip_master }} - Worker1 {{ ip_worker1 }} - Worker2 {{ ip_worker2 }}'
+  tags: createCluster
+
+- name: prepare host file
+  template:
+    src: hosts.j2.yml
+    dest: "{{ playbook_dir }}/inventories/hosts.yml"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "u=rw,g=r,o=r"
+  tags: createCluster
+
+- name: Refresh inventory
+  meta: refresh_inventory
+  tags: createCluster
+
+- name: remove ssh_keys of actual cluster members from known hosts
+  known_hosts:
+    state: absent
+    name: "{{ item }}"
+  with_items: 
+    - "{{ ip_master }}"
+    - "{{ ip_worker1 }}"
+    - "{{ ip_worker2 }}"
+  tags: createCluster
+
+- name: sleep for 10 seconds and continue with play
+  wait_for: 
+    timeout: 10
+  delegate_to: localhost
+  tags: createCluster

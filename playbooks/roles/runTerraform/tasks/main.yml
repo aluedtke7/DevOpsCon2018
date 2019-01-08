@@ -1,0 +1,2 @@
+# anhand des Parameters wird die auszuführende Aktion ausgewählt
+- include: "{{ action }}.yml"

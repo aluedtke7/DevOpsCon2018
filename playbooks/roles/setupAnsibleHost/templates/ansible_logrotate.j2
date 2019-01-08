@@ -1,4 +1,4 @@
-{{ hostVarAnsibleUserHome }}/var/log/ansible.log {
+{{ lookup('env','HOME') }}/var/log/ansible.log {
   rotate 7
   daily
   compress

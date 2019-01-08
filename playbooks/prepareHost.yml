@@ -1,0 +1,27 @@
+---
+- hosts: local
+  tags: ['init', 'ansible', 'kvm', 'terraform', 'tools']
+  roles:
+    - checkUserIsRoot
+
+- hosts: local
+  tags: ['ansible']
+  roles:
+    - setupAnsibleHost
+
+- hosts: local
+  tags: ['kvm']
+  become: yes
+  roles:
+    - setupKvmHost
+
+- hosts: local
+  tags: ['terraform']
+  roles:
+    - downloadNodeIso
+    - installTerraform
+
+- hosts: local
+  tags: ['tools']
+  roles:
+    - setupKubeTools

@@ -1,0 +1,10 @@
+---
+
+- name: Aktuell angemeldeter Benutzer und Home Verzeichnis ausgeben
+  debug:
+    msg: "{{ ansible_user_id }} - {{ lookup('env','HOME') }} - {{ playbook_dir }} - {{ role_path }}"
+  tags: debug
+
+- fail: msg="Das Playbook darf NICHT als Benutzer root (sudo) ausgeführt werden!!!"
+  when: "ansible_user_id == 'root' "
+  tags: debug

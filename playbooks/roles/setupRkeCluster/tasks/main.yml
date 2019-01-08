@@ -80,4 +80,29 @@
     dest: ~/.kube/config
     flat: yes
   when: "'k8s-master' in group_names"
-...
+
+- name: Install K8S Dashboard
+  shell: kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml
+  run_once: true
+  delegate_to: localhost
+
+- name: Install admin_user SA
+  shell: kubectl create -f {{ role_path }}/files/create_sa.yml
+  run_once: true
+  delegate_to: localhost
+
+- name: Install admin_user RBAC
+  shell: kubectl create -f {{ role_path }}/files/create_rbac.yml
+  run_once: true
+  delegate_to: localhost
+
+- name: Token für admin_user auslesen
+  shell: kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
+  run_once: true
+  register: admin_user
+  delegate_to: localhost
+
+- name: Token anzeigen
+  run_once: true
+  debug:
+    msg: "{{ admin_user }}"
